@@ -3,14 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Delivery Stats</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>안녕하세요 테스트입니다.</h1>
-    <ul>
-        {% for i in students %}
-            <li>이름: {{i.name}}</li>
-        {% endfor %}
-    </ul>
+    <h1>배달 데이터 시각화</h1>
+
+    <h2>1. Statistics on delivery volume by distance in residential areas</h2>
+    <canvas id="distanceChart"></canvas>
+
+    <h2>2. Statistics on delivery amounts by date (monthly, weekly) in residential areas</h2>
+    <canvas id="dateChart"></canvas>
+
+    <h2>3. Statistics on delivery volume by weather in residential areas</h2>
+    <canvas id="weatherChart"></canvas>
+
+    <script>
+        // Distance Chart
+        var ctx = document.getElementById('distanceChart').getContext('2d');
+        var distanceData = {{ distance_stats | tojson }};
+        var distanceLabels = distanceData.map(function(d) { return d._id; });
+        var distanceCounts = distanceData.map(function(d) { return d.count; });
+        var distanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: distanceLabels,
+                datasets: [{
+                    label: 'Delivery Volume',
+                    data: distanceCounts
+                }]
+            }
+        });
+
+        // Date Chart
+        var ctx = document.getElementById('dateChart').getContext('2d');
+        var dateData = {{ date_stats | tojson }};
+        var dateLabels = dateData.map(function(d) { return d._id.month; });
+        var dateCounts = dateData.map(function(d) { return d.total_amount; });
+        var dateChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dateLabels,
+                datasets: [{
+                    label: 'Delivery Amount',
+                    data: dateCounts
+                }]
+            }
+        });
+
+        // Weather Chart
+        var ctx = document.getElementById('weatherChart').getContext('2d');
+        var weatherData = {{ weather_stats | tojson }};
+        var weatherLabels = weatherData.map(function(d) { return d._id; });
+        var weatherCounts = weatherData.map(function(d) { return d.count; });
+        var weatherChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: weatherLabels,
+                datasets: [{
+                    label: 'Delivery Volume',
+                    data: weatherCounts
+                }]
+            }
+        });
+    </script>
 </body>
 </html>
