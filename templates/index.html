@@ -30,19 +30,19 @@
     <script>
         // Distance Chart
         var ctx = document.getElementById('distanceChart').getContext('2d');
-                var distanceData = {{ distance_stats | tojson }};
-                var distanceLabels = distanceData.map(function(d) { return d._id; });
-                var distanceCounts = distanceData.map(function(d) { return d.count; });
-                var distanceChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: distanceLabels,
-                        datasets: [{
-                            label: 'Delivery Volume',
-                            data: distanceCounts
-                        }]
-                    }
-                });
+        var distanceData = {{ distance_stats | tojson }};
+        var distanceLabels = distanceData.map(function(d) { return d._id; });
+        var distanceCounts = distanceData.map(function(d) { return d.count; });
+        var distanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: distanceLabels,
+                datasets: [{
+                    label: 'Delivery Volume',
+                    data: distanceCounts
+                }]
+            }
+        });
 
         // Date Chart
         var ctx = document.getElementById('dateChart').getContext('2d');
@@ -96,26 +96,23 @@
         var dateCuisineCtx = document.getElementById('dateCuisineChart').getContext('2d');
         var dateCuisineData = {{ date_cuisine | tojson }};
         var dateCuisineLabels = dateCuisineData.map(function(d) { return d.OrderWeek; });
-        var dateCuisineCounts = dateCuisineData.map(function(d) {
-            return d.top_cuisine.map(function(item) {
-                return item.Cuisine + ': ' + item.total_orders;
-            });
-        });
         var dateCuisineChart = new Chart(dateCuisineCtx, {
             type: 'bar',
             data: {
                 labels: dateCuisineLabels,
-                datasets: dateCuisineCounts.map(function(data, index) {
+                datasets: dateCuisineData.map(function(weekData) {
                     return {
-                        label: 'Week ' + (index + 1),
-                        data: data
+                        label: weekData.OrderWeek,
+                        data: weekData.top_cuisine.map(function(item) {
+                            return item.total_orders;
+                        })
                     };
                 })
             },
             options: {
                 scales: {
-                    xAxes: [{ stacked: true }],
-                    yAxes: [{ stacked: true }]
+                    x: { stacked: true },
+                    y: { stacked: true }
                 }
             }
         });
@@ -124,30 +121,26 @@
         var allMonthsCtx = document.getElementById('allMonthsChart').getContext('2d');
         var allMonthsData = {{ all_months | tojson }};
         var allMonthsLabels = allMonthsData.map(function(d) { return d.month; });
-        var allMonthsRegions = allMonthsData.map(function(d) {
-            return d.top_regions.map(function(item) {
-                return item.province + ': ' + item.total_orders;
-            });
-        });
         var allMonthsChart = new Chart(allMonthsCtx, {
             type: 'bar',
             data: {
                 labels: allMonthsLabels,
-                datasets: allMonthsRegions.map(function(data, index) {
+                datasets: allMonthsData.map(function(monthData) {
                     return {
-                        label: 'Month ' + (index + 1),
-                        data: data
+                        label: 'Month ' + monthData.month,
+                        data: monthData.top_regions.map(function(item) {
+                            return item.total_orders;
+                        })
                     };
                 })
             },
             options: {
                 scales: {
-                    xAxes: [{ stacked: true }],
-                    yAxes: [{ stacked: true }]
+                    x: { stacked: true },
+                    y: { stacked: true }
                 }
             }
         });
-
 
     </script>
 </body>
