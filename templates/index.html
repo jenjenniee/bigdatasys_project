@@ -3,123 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>배달 데이터 분석 시각화</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #f4f4f4;
-        }
-        header {
-            width: 100%;
-            padding: 20px;
-            background-color: #333;
-            color: white;
-            text-align: center;
-        }
-        .search-bar {
-            width: 100%;
-            padding: 10px 20px;
-            background-color: #f9f9f9;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .search-bar form {
-            display: flex;
-            width: 100%;
-            max-width: 800px;
-        }
-        .search-bar input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px 0 0 4px;
-            outline: none;
-        }
-        .search-bar button {
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-left: none;
-            background-color: #333;
-            color: white;
-            cursor: pointer;
-            border-radius: 0 4px 4px 0;
-        }
-        main {
-            flex: 1;
-            width: 100%;
-            max-width: 1200px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            background-color: white;
-            margin: 20px;
-        }
-        h1, h2 {
-            margin-top: 0;
-        }
-        .chart-container {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
-        .chart {
-            width: 45%;
-            min-width: 300px;
-            height: 300px;
-            margin: 20px 0;
-        }
-        .search-results {
-            margin-top: 20px;
-        }
-    </style>
+    <title>Document</title>
 </head>
 <body>
-    <header>
-        <h1>배달 데이터 분석 시각화</h1>
-    </header>
-    <div class="search-bar">
-        <form action="/" method="get">
-            <input type="text" name="query_value" placeholder="검색어를 입력하세요">
-            <button type="submit">검색</button>
-        </form>
-    </div>
-    <main>
-        <section>
-            <h2>시각화</h2>
-            <div class="chart-container">
-                {% if query_title %}
-                    <h3>현재 시각화된 쿼리: {{ query_title }}</h3>
-                    <div class="chart">
-                        <img src="/img/{{ query_number }}.png">
-                    </div>
-                {% else %}
-                    <div class="chart">
-                        <!-- 검색 결과가 없을 때 표시될 내용 -->
-                    </div>
-                {% endif %}
-            </div>
-        </section>
-        <section>
-            <h2>검색 결과</h2>
-            <div class="search-results">
-                {% if results %}
-                    <ul>
-                        {% for result in results %}
-                            <li>{{ result.name }} - {{ result.detail }}</li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>검색 결과가 없습니다.</p>
-                {% endif %}
-            </div>
-        </section>
-    </main>
+    <h1>안녕하세요 테스트입니다.</h1>
+    <ul>
+        {% for i in students %}
+            <li>이름: {{i.name}}</li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
