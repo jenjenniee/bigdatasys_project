@@ -39,16 +39,21 @@ def index():
     date_cuisine = collection.aggregate([
         {"$group": {"_id": {"Cuisine": "$Cuisine", "OrderWeek": "$OrderWeek"}, "total_orders": {"$sum": 1}}},
         {"$group": {"_id": "$_id.OrderWeek", "top_cuisine": {"$push": {"Cuisine": "$_id.Cuisine", "total_orders": "$total_orders"}}}},
-        {"$project": {"_id": 0, "OrderWeek": "$_id", "top_cuisine": {"$slice": ["$top_cuisine", 5]}}}
+        {"$project": {"_id": 0, "OrderWeek": "$_id", "top_cuisine": {"$slice": ["$top_cuisine", 2]}}}
     ])
 
-    # 9. 지역별로 매 달 배송 수가 많은 지역 top5 추출
+    # 9. 지역별로 매 달 배송 수가 많은 지역 top1 추출
     all_months = collection.aggregate([
         {"$group": {"_id": {"month": {"$month": {"$dateFromString": {"dateString": "$Date"}}}, "province": "$AREA.Province"}, "total_orders": {"$sum": 1}}},
         {"$sort": {"_id.month": 1, "total_orders": -1}},
         {"$group": {"_id": "$_id.month", "top_regions": {"$push": {"province": "$_id.province", "total_orders": "$total_orders"}}}},
-        {"$project": {"_id": 0, "month": "$_id", "top_regions": {"$slice": ["$top_regions", 5]}}}
+        {"$project": {"_id": 0, "month": "$_id", "top_regions": {"$slice": ["$top_regions", 1]}}}
     ])
+
+
+
+
+    
 
     # 데이터 변환
     distance_stats = list(distance_stats)
