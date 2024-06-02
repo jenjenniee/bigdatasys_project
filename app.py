@@ -6,8 +6,8 @@ app = Flask(__name__)
 
 # MongoDB 연결 설정
 client = MongoClient("mongodb://localhost:27017/")
-db = client.delivery
-collection = db.data
+db = client.delivery #Database name : delivery
+collection = db.data #collection name : data
 
 
 @app.route('/')
