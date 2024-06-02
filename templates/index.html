@@ -18,22 +18,31 @@
     <h2>3. Statistics on delivery volume by weather in residential areas</h2>
     <canvas id="weatherChart"></canvas>
 
+    <h2>7. Statistics on food for the entire region and the entire period</h2>
+    <canvas id="allStatsChart"></canvas>
+
+    <h2>8. Statistics on which Cuisine was delivered a lot by every day of the week</h2>
+    <canvas id="dateCuisineChart"></canvas>
+
+    <h2>9. Local top5 statistics with high monthly deliveries by regions</h2>
+    <canvas id="allMonthsChart"></canvas>
+
     <script>
- // Distance Chart
- var ctx = document.getElementById('distanceChart').getContext('2d');
-        var distanceData = {{ distance_stats | tojson }};
-        var distanceLabels = distanceData.map(function(d) { return d._id; });
-        var distanceCounts = distanceData.map(function(d) { return d.count; });
-        var distanceChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: distanceLabels,
-                datasets: [{
-                    label: 'Delivery Volume',
-                    data: distanceCounts
-                }]
-            }
-        });
+        // Distance Chart
+        var ctx = document.getElementById('distanceChart').getContext('2d');
+                var distanceData = {{ distance_stats | tojson }};
+                var distanceLabels = distanceData.map(function(d) { return d._id; });
+                var distanceCounts = distanceData.map(function(d) { return d.count; });
+                var distanceChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: distanceLabels,
+                        datasets: [{
+                            label: 'Delivery Volume',
+                            data: distanceCounts
+                        }]
+                    }
+                });
 
         // Date Chart
         var ctx = document.getElementById('dateChart').getContext('2d');
