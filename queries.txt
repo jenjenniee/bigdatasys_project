@@ -1,0 +1,26 @@
+query7: db.delivery.deliveries([
+  {
+    "$match": {
+      "AREA.District": "노형동",
+      "Cuisine": "디저트"
+    }
+  }
+])
+
+
+query77: db.delivery.deliveries([
+    { $group: { _id: "$OrderWeek", totalOrders: { $sum: 1 } } },
+    { $sort: { "_id": 1 } }
+])
+
+query8: db.elivery.deliveries([
+    { $group: { _id: "$OrderWeek", totalOrders: { $sum: 1 } } },
+    { $sort: { "_id": 1 } }
+])
+
+
+query9: db.elivery.deliveries([
+    { $group: { _id: { month: { $month: { $dateFromString: { dateString: "$Date", format: "%Y-%m-%d" } } }, region: "$AREA.Province" }, totalOrders: { $sum: 1 } } },
+    { $sort: { "_id.month": 1, totalOrders: -1 } }
+])
+
