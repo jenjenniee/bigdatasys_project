@@ -19,8 +19,8 @@
     <canvas id="weatherChart"></canvas>
 
     <script>
-        // Distance Chart
-        var ctx = document.getElementById('distanceChart').getContext('2d');
+ // Distance Chart
+ var ctx = document.getElementById('distanceChart').getContext('2d');
         var distanceData = {{ distance_stats | tojson }};
         var distanceLabels = distanceData.map(function(d) { return d._id; });
         var distanceCounts = distanceData.map(function(d) { return d.count; });
@@ -66,6 +66,80 @@
                 }]
             }
         });
+
+        // 전 지역, 전 기간의 주문된 배달음식 품목 순위 (7번 쿼리)
+        var allStatsCtx = document.getElementById('allStatsChart').getContext('2d');
+        var allStatsData = {{ all_stats | tojson }};
+        var allStatsLabels = allStatsData.map(function(d) { return d._id; });
+        var allStatsCounts = allStatsData.map(function(d) { return d.total_orders; });
+        var allStatsChart = new Chart(allStatsCtx, {
+            type: 'bar',
+            data: {
+                labels: allStatsLabels,
+                datasets: [{
+                    label: '주문 수',
+                    data: allStatsCounts
+                }]
+            }
+        });
+
+        // 요일별로 어떤 Cuisine이 많이 배달되었는지 통계 (8번 쿼리)
+        var dateCuisineCtx = document.getElementById('dateCuisineChart').getContext('2d');
+        var dateCuisineData = {{ date_cuisine | tojson }};
+        var dateCuisineLabels = dateCuisineData.map(function(d) { return d.OrderWeek; });
+        var dateCuisineCounts = dateCuisineData.map(function(d) {
+            return d.top_cuisine.map(function(item) {
+                return item.Cuisine + ': ' + item.total_orders;
+            });
+        });
+        var dateCuisineChart = new Chart(dateCuisineCtx, {
+            type: 'bar',
+            data: {
+                labels: dateCuisineLabels,
+                datasets: dateCuisineCounts.map(function(data, index) {
+                    return {
+                        label: 'Week ' + (index + 1),
+                        data: data
+                    };
+                })
+            },
+            options: {
+                scales: {
+                    xAxes: [{ stacked: true }],
+                    yAxes: [{ stacked: true }]
+                }
+            }
+        });
+
+        // 지역별로 매 달 배송 수가 많은 지역 top5 추출 (9번 쿼리)
+        var allMonthsCtx = document.getElementById('allMonthsChart').getContext('2d');
+        var allMonthsData = {{ all_months | tojson }};
+        var allMonthsLabels = allMonthsData.map(function(d) { return d.month; });
+        var allMonthsRegions = allMonthsData.map(function(d) {
+            return d.top_regions.map(function(item) {
+                return item.province + ': ' + item.total_orders;
+            });
+        });
+        var allMonthsChart = new Chart(allMonthsCtx, {
+            type: 'bar',
+            data: {
+                labels: allMonthsLabels,
+                datasets: allMonthsRegions.map(function(data, index) {
+                    return {
+                        label: 'Month ' + (index + 1),
+                        data: data
+                    };
+                })
+            },
+            options: {
+                scales: {
+                    xAxes: [{ stacked: true }],
+                    yAxes: [{ stacked: true }]
+                }
+            }
+        });
+
+
     </script>
 </body>
 </html>
