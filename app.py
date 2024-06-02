@@ -11,13 +11,16 @@ def home():
     # db접근
     db = client.practice
     # collection접근
-    collection = db.sutudents
+    collection = db.students
 
     # 임시쿼리 - collect에서 모든 데이터 가져오기
-    students = list(collection.find())
+    result = collection.find()
 
 
-    return render_template('index.html', students=students)
+
+    # client.close()
+
+    return render_template('index.html', students=result)
 
 if __name__ == '__main__':
     app.run(debug=True)
