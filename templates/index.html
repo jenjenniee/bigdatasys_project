@@ -21,10 +21,10 @@
     <h2>7. Statistics on food for the entire region and the entire period</h2>
     <canvas id="allStatsChart"></canvas>
 
-    <h2>8. Statistics on which Cuisine was delivered a lot by every day of the week</h2>
+    <h2>8. Statistics on which Cuisine was delivered a lot by daily</h2>
     <canvas id="dateCuisineChart"></canvas>
 
-    <h2>9. Local top5 statistics with high monthly deliveries by regions</h2>
+    <h2>9. Local top3 statistics with high monthly deliveries by regions</h2>
     <canvas id="allMonthsChart"></canvas>
 
     <script>
@@ -76,72 +76,161 @@
             }
         });
 
-        // 전 지역, 전 기간의 주문된 배달음식 품목 순위 (7번 쿼리)
-        var allStatsCtx = document.getElementById('allStatsChart').getContext('2d');
-        var allStatsData = {{ all_stats | tojson }};
-        var allStatsLabels = allStatsData.map(function(d) { return d._id; });
-        var allStatsCounts = allStatsData.map(function(d) { return d.total_orders; });
-        var allStatsChart = new Chart(allStatsCtx, {
+        // 7. 전체 기간의 (전 지역, 전 기간의) 주문된 배달음식 품목 순위
+        var ctx = document.getElementById('allStatsChart').getContext('2d');
+        var allCuisineData = {{ all_stats | tojson }};
+        var allCuisineLabels = allCuisineData.map(function(d) { return d._id; });
+        var allCuisineOrders = allCuisineData.map(function(d) { return d.total_orders; });
+        var allCuisineChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: allStatsLabels,
+                labels: allCuisineLabels,
                 datasets: [{
-                    label: '주문 수',
-                    data: allStatsCounts
+                    label: 'Total Orders',
+                    data: allCuisineOrders,
+                    backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                    borderColor: 'rgb(255, 205, 86)',
+                    borderWidth: 1,
                 }]
-            }
-        });
-
-        // 요일별로 어떤 Cuisine이 많이 배달되었는지 통계 (8번 쿼리)
-        var dateCuisineCtx = document.getElementById('dateCuisineChart').getContext('2d');
-        var dateCuisineData = {{ date_cuisine | tojson }};
-        var dateCuisineLabels = dateCuisineData.map(function(d) { return d.OrderWeek; });
-        var dateCuisineChart = new Chart(dateCuisineCtx, {
-            type: 'bar',
-            data: {
-                labels: dateCuisineLabels,
-                datasets: dateCuisineData.map(function(weekData) {
-                    return {
-                        label: weekData.OrderWeek,
-                        data: weekData.top_cuisine.map(function(item) {
-                            return item.total_orders;
-                        })
-                    };
-                })
             },
             options: {
                 scales: {
-                    x: { stacked: true },
-                    y: { stacked: true }
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1000
+                        }
+                    }
                 }
             }
         });
 
-        // 지역별로 매 달 배송 수가 많은 지역 top5 추출 (9번 쿼리)
-        var allMonthsCtx = document.getElementById('allMonthsChart').getContext('2d');
-        var allMonthsData = {{ all_months | tojson }};
-        var allMonthsLabels = allMonthsData.map(function(d) { return d.month; });
-        var allMonthsChart = new Chart(allMonthsCtx, {
+
+
+        // 8. 요일별로 어떤 Cuisine이 많이 배달되었는지 통계
+        var ctx2 = document.getElementById('dateCuisineChart').getContext('2d');
+        var dayOfWeekCuisineData = {{ date_cuisine | tojson }};
+        var dayOfWeekLabels = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        // 각 요일에 대해 두 개의 음식을 다른 색상으로 표시
+        var cuisine1Data = dayOfWeekCuisineData.map(function(d) { return d.top_cuisine[0].total_orders; });
+        var cuisine2Data = dayOfWeekCuisineData.map(function(d) { return d.top_cuisine[1].total_orders; });
+        var cuisine1Labels = dayOfWeekCuisineData.map(function(d) { return d.top_cuisine[0].Cuisine; });
+        var cuisine2Labels = dayOfWeekCuisineData.map(function(d) { return d.top_cuisine[1].Cuisine; });
+
+        var dayOfWeekCuisineChart = new Chart(ctx2, {
             type: 'bar',
+            data: {
+                labels: dayOfWeekLabels,
+                datasets: [
+                    {
+                        label: 'Top Cuisine 1',
+                        data: cuisine1Data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 1,
+                        barThickness: 'flex'
+                    },
+                    {
+                        label: 'Top Cuisine 2',
+                        data: cuisine2Data,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgb(153, 102, 255)',
+                        borderWidth: 1,
+                        barThickness: 'flex'
+                    }
+                ]
+            },
+            options: {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var index = context.dataIndex;
+                                if (context.datasetIndex === 0) {
+                                    return cuisine1Labels[index] + ': ' + context.raw;
+                                } else {
+                                    return cuisine2Labels[index] + ': ' + context.raw;
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // 9. 지역별 상위 5개 지역의 월간 주문량 통계
+        // var ctx = document.getElementById('allMonthsChart').getContext('2d');
+        // var allMonthsData = {{ all_months | tojson }};
+        // var allMonthsLabels = allMonthsData.map(function(d) { return d._id; });
+        // var allMonthsOrders = allMonthsData.map(function(d) { return d.total_orders; });
+
+        // var allMonthsChart = new Chart(ctx, {
+        //     type: 'bar',
+        //     data: {
+        //         labels: allMonthsLabels,
+        //         datasets: [{
+        //             label: 'Total Orders',
+        //             data: allMonthsOrders,
+        //             backgroundColor: 'rgba(255, 205, 86, 0.2)',
+        //             borderColor: 'rgb(255, 205, 86)',
+        //             borderWidth: 1
+        //         }]
+        //     },
+        //     options: {
+        //         scales: {
+        //             y: {
+        //                 beginAtZero: true,
+        //                 ticks: {
+        //                     stepSize: 100
+        //                 }
+        //             }
+        //         }
+        //     }
+        // });
+
+        // 9. 지역별 상위 3개 지역의 월간 주문량 통계
+        var ctx = document.getElementById('allMonthsChart').getContext('2d');
+        var allMonthsData = {{ all_months | tojson }};
+        var allMonthsLabels = allMonthsData.map(function(d) { return d._id; });
+        var allMonthsOrders = allMonthsData.map(function(d) { return d.total_orders; });
+
+        var allMonthsChart = new Chart(ctx, {
+            type: 'polarArea',
             data: {
                 labels: allMonthsLabels,
-                datasets: allMonthsData.map(function(monthData) {
-                    return {
-                        label: 'Month ' + monthData.month,
-                        data: monthData.top_regions.map(function(item) {
-                            return item.total_orders;
-                        })
-                    };
-                })
+                datasets: [{
+                    label: 'Total Orders',
+                    data: allMonthsOrders,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 205, 86, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 205, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
             },
             options: {
                 scales: {
-                    x: { stacked: true },
-                    y: { stacked: true }
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
         });
 
-    </script>
+
+
+</script>
 </body>
 </html>
