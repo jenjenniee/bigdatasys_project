@@ -29,26 +29,25 @@ def index():
         {"$sort": {"_id": 1}}
     ])
 
-    # 7. 전 지역, 전 기간의 주문된 배달음식 품목 순위
+    # 7. 배달음식 품목별 순위 통계
     all_stats = collection.aggregate([
         {"$group": {"_id": "$Cuisine", "total_orders": {"$sum": 1}}},
         {"$sort": {"total_orders": -1}}
     ])
 
-    # 8. 요일별로 어떤 Cuisine이 많이 배달되었는지 top cuisine 2개 추출
+    # 8. 2020년 7월에 가장 인기가 많았던 Cuisine의 내림차순 통계
     date_cuisine = collection.aggregate([
-        {"$group": {"_id": {"Cuisine": "$Cuisine", "OrderWeek": "$OrderWeek"}, "total_orders": {"$sum": 1}}},
-        {"$group": {"_id": "$_id.OrderWeek", "top_cuisine": {"$push": {"Cuisine": "$_id.Cuisine", "total_orders": "$total_orders"}}}},
-        {"$project": {"_id": 0, "OrderWeek": "$_id", "top_cuisine": {"$slice": ["$top_cuisine", 2]}}}
+        {"$match": {"Date": {"$regex": "^2020-07"}}},
+        {"$group": {"_id": "$Cuisine", "total_orders": {"$sum": 1}}},
+        {"$sort": {"total_orders": -1}}
     ])
 
-    # 9. 지역별로 배달 수가 많은 동 (District) top 3 추출
-    all_months = collection.aggregate([
-        {"$group": {"_id": "$AREA.District", "total_orders": { "$sum": 1 }}},
-        {"$sort": { "total_orders": -1 }},
-        {"$limit": 3 }
+    # 9. 배달 평균 금액이 큰 동네 TOP3 통계
+    lowest_price_neighborhoods = collection.aggregate([
+        {"$group": {"_id": "$AREA.Neighborhood", "avg_price": {"$avg": "$Price"}}},
+        {"$sort": {"avg_price": -1}},
+        {"$limit": 3}
     ])
-
 
 
 
@@ -61,10 +60,10 @@ def index():
     weather_stats = list(weather_stats)
     all_stats = list(all_stats)
     date_cuisine = list(date_cuisine)
-    all_months = list(all_months)
+    lowest_price_neighborhoods = list(lowest_price_neighborhoods)
 
     return render_template('index.html', distance_stats=distance_stats, date_stats=date_stats,
-                           weather_stats=weather_stats, all_stats=all_stats, date_cuisine=date_cuisine, all_months=all_months)
+                           weather_stats=weather_stats, all_stats=all_stats, date_cuisine=date_cuisine, lowest_price_neighborhoods=lowest_price_neighborhoods)
 
 
 if __name__ == '__main__':
