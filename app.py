@@ -35,20 +35,20 @@ def index():
         {"$sort": {"total_orders": -1}}
     ])
 
-    # 8. 요일별로 어떤 Cuisine이 많이 배달되었는지 통계
+    # 8. 요일별로 어떤 Cuisine이 많이 배달되었는지 top cuisine 2개 추출
     date_cuisine = collection.aggregate([
         {"$group": {"_id": {"Cuisine": "$Cuisine", "OrderWeek": "$OrderWeek"}, "total_orders": {"$sum": 1}}},
         {"$group": {"_id": "$_id.OrderWeek", "top_cuisine": {"$push": {"Cuisine": "$_id.Cuisine", "total_orders": "$total_orders"}}}},
         {"$project": {"_id": 0, "OrderWeek": "$_id", "top_cuisine": {"$slice": ["$top_cuisine", 2]}}}
     ])
 
-    # 9. 지역별로 매 달 배송 수가 많은 지역 top1 추출
+    # 9. 지역별로 배달 수가 많은 동 (District) top 3 추출
     all_months = collection.aggregate([
-        {"$group": {"_id": {"month": {"$month": {"$dateFromString": {"dateString": "$Date"}}}, "province": "$AREA.Province"}, "total_orders": {"$sum": 1}}},
-        {"$sort": {"_id.month": 1, "total_orders": -1}},
-        {"$group": {"_id": "$_id.month", "top_regions": {"$push": {"province": "$_id.province", "total_orders": "$total_orders"}}}},
-        {"$project": {"_id": 0, "month": "$_id", "top_regions": {"$slice": ["$top_regions", 1]}}}
+        {"$group": {"_id": "$AREA.District", "total_orders": { "$sum": 1 }}},
+        {"$sort": { "total_orders": -1 }},
+        {"$limit": 3 }
     ])
+
 
 
 
