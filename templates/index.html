@@ -5,27 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery Stats</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        header {
+            background-color: #0ec3d3;
+            padding: 3rem;
+            text-align: center;
+        }
+        header nav a {
+            color: white;
+            margin: 0 20px;
+            font-size: 30px;
+            text-decoration: none;
+        }
+        footer {
+            background-color: #0ec3d3;
+            color: white;
+            text-align: center;
+            padding: 0.5rem;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .chart-container {
+            margin: 0 auto;
+            max-width: 80%;
+        }
+    </style>
+</head>
 <body>
-    <h1>Visualization of Delivery Data</h1>
+    <header>
+        <nav>
+            <a href="#distanceChart">Query1</a>
+            <a href="#dateChart">Query2</a>
+            <a href="#weatherChart">Query3</a>
+            <!-- 민아언니 수정! -->
+            <a href="@@">Query4</a>
+            <a href="@@">Query5</a>
+            <a href="@@">Query6</a>
+            <a href="#allStatsChart">Query7</a>
+            <a href="#dateCuisineChart">Query8</a>
+            <a href="#lowestPriceNeighborhoodChart">Query9</a>
+        </nav>
+    </header>
+    <main>
+        <h1>Visualization of Delivery Data</h1>
 
-    <h2>1. Statistics on delivery volume by distance in residential areas</h2>
-    <canvas id="distanceChart"></canvas>
+        <div class="chart-container">
+            <h2>1. Statistics on delivery volume by distance in residential areas</h2>
+            <canvas id="distanceChart"></canvas>
+        </div>
 
-    <h2>2. Statistics on delivery amounts by date (monthly, weekly) in residential areas</h2>
-    <canvas id="dateChart"></canvas>
+        <div class="chart-container">
+            <h2>2. Statistics on delivery amounts by date (monthly, weekly) in residential areas</h2>
+            <canvas id="dateChart"></canvas>
+        </div>
 
-    <h2>3. Statistics on delivery volume by weather in residential areas</h2>
-    <canvas id="weatherChart"></canvas>
+        <div class="chart-container">
+            <h2>3. Statistics on delivery volume by weather in residential areas</h2>
+            <canvas id="weatherChart"></canvas>
+        </div>
 
-    <h2>7. 배달음식 품목별 순위 통계</h2>
-    <canvas id="allStatsChart"></canvas>
+        <div class="chart-container">
+            <h2>7. 배달음식 품목별 순위 통계</h2>
+            <canvas id="allStatsChart"></canvas>
+        </div>
 
-    <h2>8. 2020년 7월에 가장 인기가 많았던 Cuisine의 내림차순 통계</h2>
-    <canvas id="dateCuisineChart"></canvas>
+        <div class="chart-container">
+            <h2>8. 2020년 7월에 가장 인기가 많았던 Cuisine의 내림차순 통계</h2>
+            <canvas id="dateCuisineChart"></canvas>
+        </div>
 
-    <h2>9. 배달 평균 금액이 큰 동네 TOP3 통계 </h2>
-    <canvas id="lowestPriceNeighborhoodChart"></canvas>
+        <div class="chart-container">
+            <h2>9. 배달 평균 금액이 큰 동네 TOP3 통계 </h2>
+            <canvas id="lowestPriceNeighborhoodChart"></canvas>
+        </div>
+    </main>
 
     <script>
         // Distance Chart
@@ -185,9 +242,9 @@
                 indexAxis: 'y'
             }
         });
-
-
- 
-</script>
+    </script>
 </body>
+<footer>
+    <p>&copy; 빅데이터시스템설계 7조 </p>
+</footer>
 </html>
