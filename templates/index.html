@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery Stats</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-errorbars"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,10 +42,9 @@
             <a href="#distanceChart">Query1</a>
             <a href="#dateChart">Query2</a>
             <a href="#weatherChart">Query3</a>
-            <!-- 민아언니 수정! -->
-            <a href="@@">Query4</a>
-            <a href="@@">Query5</a>
-            <a href="@@">Query6</a>
+            <a href="#deliverycityChart">Query4</a>
+            <a href="#FtypeChart">Query5</a>
+            <a href="#ageChart">Query6</a>
             <a href="#allStatsChart">Query7</a>
             <a href="#dateCuisineChart">Query8</a>
             <a href="#lowestPriceNeighborhoodChart">Query9</a>
@@ -66,6 +66,21 @@
         <div class="chart-container">
             <h2>3. Statistics on delivery volume by weather in residential areas</h2>
             <canvas id="weatherChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>4. 주거지역별 배달 품목 통계
+            <canvas id="deliverycityChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>5. 가구별 배달품목 및 통계
+            <canvas id="FtypeChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>6.연령대별 배달 음식 품목 통계
+            <canvas id="ageChart"></canvas>
         </div>
 
         <div class="chart-container">
@@ -132,6 +147,107 @@
                 }]
             }
         });
+
+        // 4.주거 지역별 배달 음식 품목 통계
+        var ctx = document.getElementById('deliverycityChart').getContext('2d');
+        var deliveryCityData = {{ delivery_city_stats | tojson }};
+        var deliveryCityLabels = deliveryCityData.map(function(d) { return d._id.City + " - " + d._id.Cuisine; });
+        var deliveryCityCounts = deliveryCityData.map(function(d) { return d.total_orders; });
+        var deliveryCityChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: deliveryCityLabels,
+                datasets: [{
+                    label: 'count',
+                    data: deliveryCityCounts
+                }]
+            },
+            options: {
+                legend: { position: 'left'}
+            }
+        });
+
+        //5.가구별 배달품목 및 금액통계  // 차트 안뜸 수정하기
+        var ctx = document.getElementById('FtypeChart').getContext('2d');
+        var FtypesData = {{ Ftypes_cuisine_stats | tojson }};
+        var labels = [];
+        var avgPrices = [];
+        var minPrices = [];
+        var maxPrices = [];
+
+
+        FtypesData.forEach(cuisine => {
+            cuisine.top_3_ftypes.forEach(ftype => {
+            labels.push(`${cuisine._id}-${ftype.FType}`);
+            avgPrices.push(ftype.average_price);
+            minPrices.push(ftype.min_price);
+            maxPrices.push(ftype.max_price);
+            });
+        });
+
+    // Create the bar chart
+    var top3FtypeChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Average Price',
+                data: avgPrices,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgb(255, 99, 132)',
+                borderWidth: 1
+            },
+            {
+                label: 'Minimum Price',
+                data: minPrices,
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                borderColor: 'rgb(255, 159, 64)',
+                borderWidth: 1
+            },
+            {
+                label: 'Maximum Price',
+                data: maxPrices,
+                backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                borderColor: 'rgb(255, 205, 86)',
+                borderWidth: 1
+            },
+            
+        ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Price'
+                    }
+                }
+            }
+        }
+    });
+
+        // 6. 연령대별 배달 음식 품목 통계
+        var ctx = document.getElementById('ageChart').getContext('2d');
+        var ageData = {{ age_stats | tojson }};
+        var ageLabels = ageData.map(function(d) { return d._id; });
+        var ageCounts = ageData.map(function(d) { return d.total_orders; });
+        var ageChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ageLabels,
+                datasets: [{
+                    label: 'count',
+                    data: ageCounts
+                }]
+            },
+            options: {
+                legend: { position: 'left'}
+            }
+        });
+
+        
+
 
        // 7. 전체 기간의 (전 지역, 전 기간의) 주문된 배달음식 품목 순위
        var ctx = document.getElementById('allStatsChart').getContext('2d');

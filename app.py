@@ -29,6 +29,86 @@ def index():
         {"$sort": {"_id": 1}}
     ])
 
+    # 4.주거 지역별 배달 음식 품목 통계
+    delivery_city_stats = collection.aggregate([
+    {"$match": {
+        "AREA.City": {
+            "$ne": "null",
+            "$ne": ""
+        }
+    }},
+    
+    {"$group": {
+        "_id": {
+            "City": "$AREA.City",
+            "Cuisine": "$Cuisine"
+        },
+        "total_orders": {"$sum": 1}
+    }},
+    
+    {"$sort": {"total_orders": -1}}
+    ])
+    # 5. 가구 유형별 배달량 및 금액 통계
+    Ftypes_cuisine_stats = collection.aggregate([
+    {
+        "$group": {
+            "_id": {
+                "Cuisine": "$Cuisine",
+                "FType": "$FType"
+            },
+            "total_orders": { "$sum": 1 },
+            "average_price": { "$avg": "$Price" },
+            "min_price": { "$min": "$Price" },
+            "max_price": { "$max": "$Price" }
+        }
+    },
+    {
+        "$sort": { "total_orders": -1 }
+    },
+    {
+        "$group": {
+            "_id": "$_id.Cuisine",
+            "ftypes": {
+                "$push": {
+                    "FType": "$_id.FType",
+                    "total_orders": "$total_orders",
+                    "average_price": "$average_price",
+                    "min_price": "$min_price",
+                    "max_price": "$max_price"
+                }
+            }
+        }
+    },
+    {
+        "$project": {
+            "_id": 1,
+            "top_3_ftypes": { "$slice": ["$ftypes", 3] }  #상위 가구 3개까지 
+        }
+    }
+])
+    # 6. 연령대별 배달 음식 품목 통계
+    age_stats = collection.aggregate([
+    {
+        "$group": {
+            "_id": {
+                "$switch": {
+                    "branches": [
+                        {"case": {"$lte": ["$Age", 10]}, "then": "0-10"},
+                        {"case": {"$lte": ["$Age", 20]}, "then": "11-20"},
+                        {"case": {"$lte": ["$Age", 30]}, "then": "21-30"},
+                        {"case": {"$lte": ["$Age", 40]}, "then": "31-40"},
+                        {"case": {"$lte": ["$Age", 50]}, "then": "41-50"},
+                    ],
+                    "default": "etc"
+                }
+            },
+            "Cuisine": {"$first": "$Cuisine"},
+            "total_orders": {"$sum": 1}
+        }
+    },
+    {"$sort": {"_id": 1, "total_orders": -1}}
+    ])
+    
     # 7. 배달음식 품목별 순위 통계
     all_stats = collection.aggregate([
         {"$group": {"_id": "$Cuisine", "total_orders": {"$sum": 1}}},
@@ -49,21 +129,27 @@ def index():
         {"$limit": 3}
     ])
 
+    
 
 
 
     
 
     # 데이터 변환
+    
     distance_stats = list(distance_stats)
     date_stats = list(date_stats)
     weather_stats = list(weather_stats)
+    delivery_city_stats = list(delivery_city_stats)
+    Ftypes_cuisine_stats = list(Ftypes_cuisine_stats)
+    age_stats = list(age_stats)
     all_stats = list(all_stats)
     date_cuisine = list(date_cuisine)
-    lowest_price_neighborhoods = list(lowest_price_neighborhoods)
+    lowest_price_neighborhoods = list(lowest_price_neighborhoods) 
 
-    return render_template('index.html', distance_stats=distance_stats, date_stats=date_stats,
-                           weather_stats=weather_stats, all_stats=all_stats, date_cuisine=date_cuisine, lowest_price_neighborhoods=lowest_price_neighborhoods)
+    return render_template('index.html', distance_stats=distance_stats, date_stats=date_stats,weather_stats=weather_stats, 
+                           delivery_city_stats=delivery_city_stats, Ftypes_cuisine_stats=Ftypes_cuisine_stats,age_stats=age_stats,
+                           all_stats=all_stats, date_cuisine=date_cuisine, lowest_price_neighborhoods=lowest_price_neighborhoods)
 
 
 if __name__ == '__main__':
