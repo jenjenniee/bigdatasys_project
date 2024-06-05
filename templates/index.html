@@ -47,7 +47,7 @@
             <a href="#ageChart">Query6</a>
             <a href="#allStatsChart">Query7</a>
             <a href="#dateCuisineChart">Query8</a>
-            <a href="#lowestPriceNeighborhoodChart">Query9</a>
+            <a href="#highestPriceNeighborhoodChart">Query9</a>
         </nav>
     </header>
     <main>
@@ -89,13 +89,13 @@
         </div>
 
         <div class="chart-container">
-            <h2>8. 2020년 7월에 가장 인기가 많았던 Cuisine의 내림차순 통계</h2>
+            <h2>8. 2020년 7월 기준 각 "도"들의 Cuisine 별 배달량 통계</h2>
             <canvas id="dateCuisineChart"></canvas>
         </div>
 
         <div class="chart-container">
             <h2>9. 배달 평균 금액이 큰 동네 TOP3 통계 </h2>
-            <canvas id="lowestPriceNeighborhoodChart"></canvas>
+            <canvas id="highestPriceNeighborhoodChart"></canvas>
         </div>
     </main>
 
@@ -291,11 +291,12 @@
         });  
 
 
-
-        // 8. 2020년 7월에 가장 인기가 많았던 Cuisine의 내림차순 통계
+        // 8. 2020년 7월 기준 각 "도"들의 Cuisine 통계 ("시" 제외)
         var data = {{ date_cuisine | tojson | safe }};
-        var cuisines = data.map(function(item) { return item._id;});
-        var orders = data.map(function(item) {return item.total_orders;});
+        var cuisines = data.map(function(item) {
+            return item._id.Province + ', ' + item._id.City + ', ' + item._id.Cuisine;});
+        var orders = data.map(function(item) {
+            return item.total_orders;});
         var ctx = document.getElementById('dateCuisineChart').getContext('2d');
         var dateCuisineChart = new Chart(ctx, {
             type: 'polarArea',
@@ -305,19 +306,21 @@
                     label: 'Total Orders',
                     data: orders,
                     backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                                'rgba(255, 159, 64, 0.2)',
-                                'rgba(255, 205, 86, 0.2)',
-                                'rgba(75, 192, 192, 0.2)',
-                                'rgba(54, 162, 235, 0.2)',
-                                'rgba(153, 102, 255, 0.2)'],
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(255, 159, 64, 0.2)',
+                        'rgba(255, 205, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
                     borderColor: [
-                                'rgb(255, 99, 132)',
-                                'rgb(255, 159, 64)',
-                                'rgb(255, 205, 86)',
-                                'rgb(75, 192, 192)',
-                                'rgb(54, 162, 235)',
-                                'rgb(153, 102, 255)'],
+                        'rgb(255, 99, 132)',
+                        'rgb(255, 159, 64)',
+                        'rgb(255, 205, 86)',
+                        'rgb(75, 192, 192)',
+                        'rgb(54, 162, 235)',
+                        'rgb(153, 102, 255)'
+                    ],
                     borderWidth: 1
                 }]
             },
@@ -328,15 +331,18 @@
                     }
                 }
             }
-        });  
+        });
+ 
 
         // 9. 배달 평균 금액이 큰 동네 TOP3 통계
-        var ctx = document.getElementById('lowestPriceNeighborhoodChart').getContext('2d');
-        var lowestPriceData = {{ lowest_price_neighborhoods | tojson }};
-        var neighborhoods = lowestPriceData.map(function(d) { return d._id; });
-        var avgPrices = lowestPriceData.map(function(d) { return d.avg_price; });
-
-        var lowestPriceChart = new Chart(ctx, {
+        var highestPriceData = {{ highest_price_neighborhoods|safe }};
+        
+        var neighborhoods = highestPriceData.map(function(d) {
+            return d._id.City + ', ' + d._id.Neighborhood;});
+        var avgPrices = highestPriceData.map(function(d) {
+            return d.avg_price;});
+        var ctx = document.getElementById('highestPriceNeighborhoodChart').getContext('2d');
+        var highestPriceChart = new Chart(ctx, { 
             type: 'bar',
             data: {
                 labels: neighborhoods,
@@ -344,20 +350,26 @@
                     label: 'Average Price',
                     data: avgPrices,
                     backgroundColor: [
-                                    'rgba(255, 99, 132, 0.2)',
-                                    'rgba(255, 159, 64, 0.2)',
-                                    'rgba(255, 205, 86, 0.2)'],
-                        borderColor: [
-                                    'rgb(255, 99, 132)',
-                                    'rgb(255, 159, 64)',
-                                    'rgb(255, 205, 86)'],
+                        'rgba(255, 205, 86, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgb(255, 205, 86)'
+                    ],
                     borderWidth: 1
                 }]
             },
             options: {
-                indexAxis: 'y'
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                }
             }
         });
+    
+
+
     </script>
 </body>
 <footer>

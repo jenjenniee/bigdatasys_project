@@ -48,6 +48,7 @@ def index():
     
     {"$sort": {"total_orders": -1}}
     ])
+    
     # 5. 가구 유형별 배달량 및 금액 통계
     Ftypes_cuisine_stats = collection.aggregate([
     {
@@ -115,19 +116,44 @@ def index():
         {"$sort": {"total_orders": -1}}
     ])
 
-    # 8. 2020년 7월에 가장 인기가 많았던 Cuisine의 내림차순 통계
+    # 8. 2020년 7월 기준 각 "도"들의 Cuisine 별 배달량 통계
     date_cuisine = collection.aggregate([
-        {"$match": {"Date": {"$regex": "^2020-07"}}},
-        {"$group": {"_id": "$Cuisine", "total_orders": {"$sum": 1}}},
-        {"$sort": {"total_orders": -1}}
-    ])
+    {"$match": {
+        "Date": {"$regex": "^2020-07"},
+        "AREA.Province": {"$ne": "null", "$ne": ""},
+        "AREA.City": {"$ne": "null", "$ne": ""}
+    }},
+    {"$group": {
+        "_id": {
+            "Province": "$AREA.Province",
+            "City": "$AREA.City",
+            "Cuisine": "$Cuisine"
+        },
+        "total_orders": {"$sum": 1}
+    }},
+    {"$sort": {"_id.Province": 1, "_id.City": 1, "total_orders": -1}}
+])
 
     # 9. 배달 평균 금액이 큰 동네 TOP3 통계
-    lowest_price_neighborhoods = collection.aggregate([
-        {"$group": {"_id": "$AREA.Neighborhood", "avg_price": {"$avg": "$Price"}}},
-        {"$sort": {"avg_price": -1}},
-        {"$limit": 3}
-    ])
+    highest_price_neighborhoods = collection.aggregate([
+    {"$group": {
+        "_id": {
+            "Province": "$AREA.Province",
+            "City": "$AREA.City",
+            "Neighborhood": "$AREA.Neighborhood"
+        },
+        "avg_price": {"$avg": "$Price"}
+    }},
+    {"$sort": {"avg_price": -1}},
+    {"$limit": 3}
+])
+    
+    
+    # aggregate([
+    #     {"$group": {"_id": "$AREA.Neighborhood", "avg_price": {"$avg": "$Price"}}},
+    #     {"$sort": {"avg_price": -1}},
+    #     {"$limit": 3}
+    # ])
 
     
 
@@ -145,11 +171,11 @@ def index():
     age_stats = list(age_stats)
     all_stats = list(all_stats)
     date_cuisine = list(date_cuisine)
-    lowest_price_neighborhoods = list(lowest_price_neighborhoods) 
+    highest_price_neighborhoods = list(highest_price_neighborhoods) 
 
     return render_template('index.html', distance_stats=distance_stats, date_stats=date_stats,weather_stats=weather_stats, 
                            delivery_city_stats=delivery_city_stats, Ftypes_cuisine_stats=Ftypes_cuisine_stats,age_stats=age_stats,
-                           all_stats=all_stats, date_cuisine=date_cuisine, lowest_price_neighborhoods=lowest_price_neighborhoods)
+                           all_stats=all_stats, date_cuisine=date_cuisine, highest_price_neighborhoods=highest_price_neighborhoods)
 
 
 if __name__ == '__main__':
