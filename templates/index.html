@@ -80,6 +80,7 @@
 
         <div class="chart-container">
             <h2>6.연령대별 배달 음식 품목 통계
+            <p style="font-size: medium;">[기준:나이]</p>
             <canvas id="ageChart"></canvas>
         </div>
 
@@ -167,7 +168,7 @@
             }
         });
 
-        //5.가구별 배달품목 및 금액통계  // 차트 안뜸 수정하기
+        //5.가구별 배달품목 및 금액통계
         var ctx = document.getElementById('FtypeChart').getContext('2d');
         var FtypesData = {{ Ftypes_cuisine_stats | tojson }};
         var labels = [];
@@ -185,7 +186,7 @@
             });
         });
 
-    // Create the bar chart
+    
     var top3FtypeChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -230,24 +231,43 @@
         // 6. 연령대별 배달 음식 품목 통계
         var ctx = document.getElementById('ageChart').getContext('2d');
         var ageData = {{ age_stats | tojson }};
-        var ageLabels = ageData.map(function(d) { return d._id; });
+
+        // Define colors for each age group
+        var ageGroupColors = {
+            "0-10": 'rgba(255, 99, 132)',
+            "11-20": 'rgba(54, 162, 235)',
+            "21-30": 'rgba(75, 192, 192)',
+            "31-40": 'rgba(255, 205, 86)',
+            "41-50": 'rgba(153, 102, 255)',
+            "etc": 'rgba(255, 159, 64)',
+        };
+
+        var ageLabels = ageData.map(function(d) { return d._id.age_group + " - " + d._id.Cuisine; });
         var ageCounts = ageData.map(function(d) { return d.total_orders; });
+        var backgroundColors = ageData.map(function(d) { return ageGroupColors[d._id.age_group]; });
+
         var ageChart = new Chart(ctx, {
-            type: 'doughnut',
+            type: 'bar',
             data: {
                 labels: ageLabels,
                 datasets: [{
-                    label: 'count',
-                    data: ageCounts
+                    label: 'Total Orders',
+                    data: ageCounts,
+                    backgroundColor: backgroundColors
                 }]
             },
             options: {
-                legend: { position: 'left'}
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Total Orders'
+                        }
+                    }
+                }
             }
         });
-
-        
-
 
        // 7. 전체 기간의 (전 지역, 전 기간의) 주문된 배달음식 품목 순위
        var ctx = document.getElementById('allStatsChart').getContext('2d');

@@ -72,7 +72,7 @@ def index():
             "ftypes": {
                 "$push": {
                     "FType": "$_id.FType",
-                    "total_orders": "$total_orders",
+                    #"total_orders": "$total_orders",
                     "average_price": "$average_price",
                     "min_price": "$min_price",
                     "max_price": "$max_price"
@@ -89,26 +89,30 @@ def index():
 ])
     # 6. 연령대별 배달 음식 품목 통계
     age_stats = collection.aggregate([
-    {
+     {
         "$group": {
             "_id": {
-                "$switch": {
-                    "branches": [
-                        {"case": {"$lte": ["$Age", 10]}, "then": "0-10"},
-                        {"case": {"$lte": ["$Age", 20]}, "then": "11-20"},
-                        {"case": {"$lte": ["$Age", 30]}, "then": "21-30"},
-                        {"case": {"$lte": ["$Age", 40]}, "then": "31-40"},
-                        {"case": {"$lte": ["$Age", 50]}, "then": "41-50"},
-                    ],
-                    "default": "etc"
-                }
+                "age_group": {
+                    "$switch": {
+                        "branches": [
+                            {"case": {"$lte": ["$Age", 10]}, "then": "0-10"},
+                            {"case": {"$lte": ["$Age", 20]}, "then": "11-20"},
+                            {"case": {"$lte": ["$Age", 30]}, "then": "21-30"},
+                            {"case": {"$lte": ["$Age", 40]}, "then": "31-40"},
+                            {"case": {"$lte": ["$Age", 50]}, "then": "41-50"},
+                        ],
+                        "default": "etc"
+                    }
+                },
+                "Cuisine": "$Cuisine"
             },
-            "Cuisine": {"$first": "$Cuisine"},
             "total_orders": {"$sum": 1}
         }
     },
-    {"$sort": {"_id": 1, "total_orders": -1}}
-    ])
+    {
+        "$sort": {"_id.age_group": 1, "total_orders": -1}
+    }
+])
     
     # 7. 배달음식 품목별 순위 통계
     all_stats = collection.aggregate([
