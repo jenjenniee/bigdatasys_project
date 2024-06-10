@@ -46,7 +46,8 @@ def index():
         "total_orders": {"$sum": 1}
     }},
     
-    {"$sort": {"total_orders": -1}}
+    {"$sort": {"total_orders": -1}},
+    {"$limit":30}
     ])
     
     # 5. 가구 유형별 배달량 및 금액 통계
@@ -72,7 +73,6 @@ def index():
             "ftypes": {
                 "$push": {
                     "FType": "$_id.FType",
-                    #"total_orders": "$total_orders",
                     "average_price": "$average_price",
                     "min_price": "$min_price",
                     "max_price": "$max_price"
